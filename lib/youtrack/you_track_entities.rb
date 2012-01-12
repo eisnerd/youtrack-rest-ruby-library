@@ -49,7 +49,7 @@ module YouTrackEntities
     end
 
     def get
-      body = REXML::Document.new(@conn.request(:get, self.path).body)
+      body = REXML::Document.new(@conn.request(:get, path).body)
       REXML::XPath.each(body, "//issue/field"){ |field|
         values = []
         REXML::XPath.each(body, field.xpath + "/value") { |value|
