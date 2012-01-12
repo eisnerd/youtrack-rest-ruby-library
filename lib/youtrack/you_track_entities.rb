@@ -12,10 +12,10 @@ module YouTrackEntities
       @conn = conn
       if project_id.nil?
         @issue_id = issue_id[/(\w+)-(\d+)/, 2]
-        @id = issue_id[/(\w+)-(\d+)/, 1]
+        @project_id = issue_id[/(\w+)-(\d+)/, 1]
       else
         @issue_id = issue_id
-        @id = project_id
+        @project_id = project_id
       end
       @issue_params = {}
       @comments = {}
