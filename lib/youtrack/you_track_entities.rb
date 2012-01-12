@@ -45,7 +45,7 @@ module YouTrackEntities
                 :group => group,
                 :disableNotifications => disable_notifications,
                 :runAs => run_as}
-      @conn.request(:post, "#{self.path}/execute", params)
+      @conn.request(:post, "#{path}/execute", params)
     end
 
     def get
