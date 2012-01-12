@@ -22,11 +22,29 @@ module YouTrackAPI
       @headers = {"Cookie" => resp["set-cookie"], "Cache-Control" => "no-cache"}
     end
 
+    def set_logger(logger)
+      @logger = case
+        when logger.nil?
+          nil
+        when logger.respond_to?(:puts)
+          lambda {|method, path, headers|
+            logger.puts "#{method.to_s.upcase} #{path}"
+          }
+        when logger.respond_to?(:call)
+          logger
+        else
+          raise "Unknown object type, #{logger.class}, for logger. Expecting either an IO or Proc object"
+      end
+    end
+    
     def request(method_name, url, params = {}, body = nil)
       path = url
       unless params.empty?
         path = "#{url}?#{url_encode(params)}"
       end
+      
+      @logger.call(method_name, path, @headers) if @logger
+      
       req = nil
       case method_name
         when :get
