@@ -1,7 +1,7 @@
 require "rexml/xpath"
 require "rexml/document"
 
-module Entities
+module YouTrackAPI
 
   class User
 
