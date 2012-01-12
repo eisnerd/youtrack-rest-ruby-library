@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "youtrack/version"
+require "youtrack_api/version"
 
 Gem::Specification.new do |s|
   s.name        = "youtrack_api"
-  s.version     = YouTrack::VERSION
+  s.version     = YouTrackAPI::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Anna Zhdan', 'Jason Rickman']
   s.email       = ['eta503@gmail.com']
