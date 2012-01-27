@@ -40,7 +40,7 @@ module YouTrackAPI
     end
 
     def apply_command(command, comment = nil, group = nil, disable_notifications = nil, run_as = nil)
-      params = {:command => command,
+      params = {:command => CGI.escape(command),
                 :comment => comment,
                 :group => group,
                 :disableNotifications => disable_notifications,
