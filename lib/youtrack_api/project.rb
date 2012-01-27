@@ -37,7 +37,12 @@ module YouTrackAPI
       # New ID of the issue is located in the 'location' field in the header
       issueId = ret.header['location'].sub(/^.*#{Regexp.escape issuePath}\/?/i,'')
       
-      Issue.new(@conn, issueId)
+      newIssue = Issue.new(@conn, issueId)
+      opts.each do |name,value|
+        newIssue.send("#{name}=".to_sym,value)
+      end
+      
+      newIssue
     end
     
     def find(filter,opts={})
