@@ -81,6 +81,14 @@ module YouTrackAPI
         self.get_param(param_name)
       end
       metaclass.send(:define_method, param_name + "=") do |values|
+        cmd = case values
+          when Array
+            values.map {|val| "add #{param_name} #{val}"}.join(' ')
+          else
+            "#{param_name} #{values}"
+        end
+            
+        self.apply_command(cmd)
         self.set_param(param_name, values)
       end
       self.set_param(param_name, params)
