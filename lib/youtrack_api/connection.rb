@@ -51,6 +51,8 @@ module YouTrackAPI
           req = Net::HTTP::Get.new(path, @headers)
         when :post
           req = Net::HTTP::Post.new(path, @headers)
+        when :put
+          req = Net::HTTP::Put.new(path, @headers)
         else
           #TODO handle this
       end
