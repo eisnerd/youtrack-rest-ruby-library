@@ -60,6 +60,14 @@ module YouTrackAPI
       self
     end
 
+    def assign_to(person)
+      self.assignee = person
+    end
+    
+    def assign_to_me
+      assign_to 'me'
+    end
+    
     def method_missing(m, *args)
       if (m[-1, 1] == "=") and (args.length > 0)
         name = m[0...-1]
