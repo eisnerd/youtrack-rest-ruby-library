@@ -1,6 +1,8 @@
 require "rexml/xpath"
 require "rexml/document"
 
+require_relative 'issue'
+
 module YouTrackAPI
 
   class Project
@@ -27,6 +29,25 @@ module YouTrackAPI
 
     end
 
+    def create(opts)
+      summary = opts.delete(:summary) or raise ":summary not given in create() options"
+      description = opts.delete(:description) or raise ":description not given in create() options"
+      
+      params = {
+        :project => CGI.escape(self.name),
+        :summary => CGI.escape(summary),
+        :description => CGI.escape(description),
+      }
+      
+      issuePath = "#{@conn.rest_path}/issue"
+      ret = @conn.request(:put,issuePath,params)
+      
+      # New ID of the issue is located in the 'location' field in the header
+      issueId = ret.header['location'].sub(/^.*#{Regexp.escape issuePath}\/?/i,'')
+      
+      Issue.new(@conn, issueId)
+    end
+    
     private
 
     def path
