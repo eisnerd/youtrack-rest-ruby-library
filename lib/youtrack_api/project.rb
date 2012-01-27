@@ -33,6 +33,11 @@ module YouTrackAPI
       "#{@conn.rest_path}/admin/project/#{id}"
     end
 
+    def find(filter,opts={})
+      params = opts.merge(:filter => filter)
+      @conn.request(:get, "#{@conn.rest_path}/issue/byproject/#{id}", params).body
+    end
+    
   end
   
 end
