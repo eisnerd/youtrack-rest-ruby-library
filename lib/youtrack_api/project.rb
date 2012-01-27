@@ -21,14 +21,6 @@ module YouTrackAPI
       [:name, :id, :lead].each{|elem| instance_variable_set("@#{elem}", project.attributes[elem.to_s])}
     end
 
-    def put
-
-    end
-
-    def post
-
-    end
-
     def create(opts)
       summary = opts.delete(:summary) or raise ":summary not given in create() options"
       description = opts.delete(:description) or raise ":description not given in create() options"
