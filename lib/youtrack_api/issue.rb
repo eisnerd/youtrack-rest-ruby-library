@@ -60,12 +60,16 @@ module YouTrackAPI
       self
     end
 
-#    def method_missing(m, *args)
-#      if (m[-1, 1] == "=") and (args.length > 0)
-#        self.create_getter_and_setter_and_set_value(m[0..-1], args)
-#      end
-#      raise NotImplementedError
-#    end
+    def method_missing(m, *args)
+      if (m[-1, 1] == "=") and (args.length > 0)
+        name = m[0...-1]
+        vals = args
+        update_remote_param(name, *vals)
+        create_getter_and_setter_and_set_value(name,*vals)
+      else
+        super
+      end
+    end
 
     private
 
@@ -81,19 +85,23 @@ module YouTrackAPI
         self.get_param(param_name)
       end
       metaclass.send(:define_method, param_name + "=") do |values|
-        cmd = case values
-          when Array
-            values.map {|val| "add #{param_name} #{val}"}.join(' ')
-          else
-            "#{param_name} #{values}"
-        end
-            
-        self.apply_command(cmd)
+        update_remote_param(param_name,values)
         self.set_param(param_name, values)
       end
       self.set_param(param_name, params)
     end
 
+    def update_remote_param(param,values)
+      cmd = case values
+        when Array
+          values.map {|val| "add #{param} #{val}"}.join(' ')
+        else
+          "#{param} #{values}"
+      end
+          
+      apply_command(cmd)
+    end
+      
     def path
       "#{@conn.rest_path}/issue/#{self.full_id}"
     end
@@ -102,7 +110,8 @@ module YouTrackAPI
       params = opts.merge(:filter => CGI.escape(filter))
       conn.request(:get, "#{conn.rest_path}/project/issues", params).body
     end
-    
+
+
   end
 
 end
