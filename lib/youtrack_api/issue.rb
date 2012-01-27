@@ -90,6 +90,11 @@ module YouTrackAPI
       "#{@conn.rest_path}/issue/#{self.full_id}"
     end
 
+    def self.find(conn, filter, opts={})
+      params = opts.merge(:filter => CGI.escape(filter))
+      conn.request(:get, "#{conn.rest_path}/project/issues", params).body
+    end
+    
   end
 
 end
