@@ -56,7 +56,7 @@ module YouTrackAPI
         when :put
           req = Net::HTTP::Put.new(path, @headers)
         else
-          #TODO handle this
+          raise ArgumentError.new("#{method_name.inspect} not supported")
       end
       @connection.start do |http|
         resp = http.request(req)
@@ -65,10 +65,8 @@ module YouTrackAPI
       end
     end
 
-    private
-
     def url_encode(params)
-      params.map{|key, value|"#{key}=#{value}"}.join("&")
+      params.map{|key, value|"#{URI.escape(key.to_s)}=#{URI.escape(value.to_s)}"}.join("&")
     end
 
   end

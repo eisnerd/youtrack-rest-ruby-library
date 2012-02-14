@@ -17,7 +17,7 @@ module YouTrackAPI
     end
 
     def get
-      project = REXML::XPath.first(REXML::Document.new(@conn.request(:get, self.path).body), "//project")
+      project = REXML::XPath.first(REXML::Document.new(@conn.request(:get, path).body), "//project")
       [:name, :id, :lead].each{|elem| instance_variable_set("@#{elem}", project.attributes[elem.to_s])}
     end
 
@@ -49,9 +49,9 @@ module YouTrackAPI
       params = opts.merge(:filter => filter)
       @conn.request(:get, "#{@conn.rest_path}/issue/byproject/#{id}", params).body
     end
-    
-    private
 
+    private
+    
     def path
       "#{@conn.rest_path}/admin/project/#{id}"
     end
