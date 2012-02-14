@@ -1,18 +1,20 @@
 require "uri"
 require "net/http"
+require "net/https"
 require "cgi"
 
 module YouTrackAPI
 
   class Connection
 
-    attr_reader :rest_path
+    attr_reader :rest_path, :connection
 
     def initialize(yt_base_url)
       correct_uri = yt_base_url.gsub(/\/$/, '')
       uri = URI.parse(correct_uri)
       @rest_path = uri.path + "/rest"
       @connection = Net::HTTP.new(uri.host, uri.port)
+      @connection.use_ssl = true if uri.scheme == 'https'
       @headers = {}
     end
 
