@@ -6,7 +6,7 @@ module YouTrackAPI
   class Issue
 
     attr_reader :project_id, :issue_id
-    attr_reader :comments, :attachments, :voters, :links
+    attr_reader :attachments, :voters, :links
 
     def initialize(conn, issue_id, project_id = nil)
       @conn = conn
@@ -17,6 +17,7 @@ module YouTrackAPI
         @issue_id = issue_id
         @project_id = project_id
       end
+      @comments_loaded = false
       @issue_params = {}
       @comments = {}
       @attachments = {}
@@ -39,7 +40,12 @@ module YouTrackAPI
       "#{self.project_id}-#{self.issue_id}"
     end
 
+    def url
+      "#{@conn.url}/issue/#{self.full_id}"
+    end
+
     def apply_command(command, comment = nil, group = nil, disable_notifications = nil, run_as = nil)
+      @comments_loaded = false
       params = {:command => CGI.escape(command),
                 :comment => comment,
                 :group => group,
@@ -60,6 +66,40 @@ module YouTrackAPI
       self
     end
 
+    class Hashit
+      def initialize(hash)
+        hash.each do |k,v|
+          self.instance_variable_set("@#{k}", v)
+          self.class.send(:define_method, k, proc{self.instance_variable_get("@#{k}")})
+          self.class.send(:define_method, "#{k}=", proc{|v| self.instance_variable_set("@#{k}", v)})
+        end
+      end
+
+      def save
+        hash_to_return = {}
+        self.instance_variables.each do |var|
+          hash_to_return[var.gsub("@","")] = self.instance_variable_get(var)
+        end
+        return hash_to_return
+      end
+    end
+
+    def comments
+      if not @comments_loaded
+        @comments_loaded = true
+        @comments = REXML::XPath.each(REXML::Document.new(@conn.request(:get, "#{path}/comment").body), "//comment").
+          map {|comment|
+            Hashit.new(
+              comment.
+                attributes.map{|a|a}.
+                push(["replies", REXML::XPath.each(comment, "//replies//*").map {|a|a}])
+            )
+          }
+      else
+        @comments
+      end
+    end
+    
     def assign_to(person)
       self.assignee = person
     end
@@ -67,13 +107,15 @@ module YouTrackAPI
     def assign_to_me
       assign_to 'me'
     end
-    
+
     def method_missing(m, *args)
       if (m[-1, 1] == "=") and (args.length > 0)
         name = m[0...-1]
         vals = args
         update_remote_param(name, *vals)
         create_getter_and_setter_and_set_value(name,*vals)
+      elsif m.to_s == "state"
+        ""
       else
         super
       end
@@ -109,7 +151,7 @@ module YouTrackAPI
           
       apply_command(cmd)
     end
-      
+
     def path
       "#{@conn.rest_path}/issue/#{self.full_id}"
     end

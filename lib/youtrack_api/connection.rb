@@ -7,12 +7,13 @@ module YouTrackAPI
 
   class Connection
 
-    attr_reader :rest_path, :connection
+    attr_reader :url, :rest_path, :connection
 
     def initialize(yt_base_url)
       correct_uri = yt_base_url.gsub(/\/$/, '')
       uri = URI.parse(correct_uri)
-      @rest_path = uri.path + "/rest"
+      @url = uri.path
+      @rest_path = url + "/rest"
       @connection = Net::HTTP.new(uri.host, uri.port)
       @connection.use_ssl = true if uri.scheme == 'https'
       @headers = {}
@@ -67,6 +68,28 @@ module YouTrackAPI
 
     def url_encode(params)
       params.map{|key, value|"#{URI.escape(key.to_s)}=#{URI.escape(value.to_s)}"}.join("&")
+    end
+    
+    def project(id)
+      YouTrackAPI::Project.new(self, nil, id)
+    end
+    
+    def projects()
+      REXML::XPath.each(REXML::Document.new(request(:get, "#{@rest_path}/admin/project").body), "//project").
+        map {|p|
+          project(p.attributes.get_attribute('id').value())
+        }
+    end
+    
+    def bundle(kind, name)
+      YouTrackAPI::Bundle.new(self, kind, name)
+    end
+    
+    def states()
+      REXML::XPath.each(REXML::Document.new(request(:get, "#{@rest_path}/admin/customfield/stateBundle").body), "//stateBundle").
+        map {|p|
+          bundle("stateBundle", p.attributes.get_attribute('name').value())
+        }
     end
 
   end

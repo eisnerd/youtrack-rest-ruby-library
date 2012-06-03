@@ -19,6 +19,7 @@ module YouTrackAPI
     def get
       project = REXML::XPath.first(REXML::Document.new(@conn.request(:get, path).body), "//project")
       [:name, :id, :lead].each{|elem| instance_variable_set("@#{elem}", project.attributes[elem.to_s])}
+      self
     end
 
     def create(opts)
@@ -48,6 +49,10 @@ module YouTrackAPI
     def find(filter,opts={})
       params = opts.merge(:filter => filter)
       @conn.request(:get, "#{@conn.rest_path}/issue/byproject/#{id}", params).body
+    end
+    
+    def issue(id)
+      YouTrackAPI::Issue.new(@conn, id, @id)
     end
 
     private
