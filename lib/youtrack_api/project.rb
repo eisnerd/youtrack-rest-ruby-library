@@ -54,6 +54,20 @@ module YouTrackAPI
     def issue(id)
       YouTrackAPI::Issue.new(@conn, id, @id)
     end
+    
+    def states
+     @conn.bundle("stateBundle", 
+      REXML::XPath.first(REXML::Document.new(@conn.request(:get, "#{path}/customfield/State").body), "//param").
+        attributes.get_attribute("value").value
+     )
+    end
+    
+    def versions
+     @conn.bundle("versionBundle", 
+      REXML::XPath.first(REXML::Document.new(@conn.request(:get, "#{path}/customfield/Fix%20versions").body), "//param").
+        attributes.get_attribute("value").value
+     )
+    end
 
     private
     
