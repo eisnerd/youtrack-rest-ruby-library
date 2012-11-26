@@ -16,10 +16,18 @@ module YouTrackAPI
     end
 
     def get
-      @items = REXML::XPath.each(REXML::Document.new(@conn.request(:get, path).body), "//state").
+      @items = REXML::XPath.each(REXML::Document.new(@conn.request(:get, path).body), "//*[../..]").
         map {|s|
-          s.text
-        }
+          s.text rescue nil
+        }.compact
+      self
+    end
+
+    def add(text, *kw)
+      params={}
+      kw.each{|i|params.merge!(i.to_hash) rescue {}}
+      @conn.request(:put, "#{path}/#{URI.escape(text)}", params)
+      @items.push(text)
       self
     end
     

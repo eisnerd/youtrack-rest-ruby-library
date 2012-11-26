@@ -69,6 +69,13 @@ module YouTrackAPI
      )
     end
 
+    def builds
+     @conn.bundle("buildBundle",
+      REXML::XPath.first(REXML::Document.new(@conn.request(:get, "#{path}/customfield/Fixed%20in%20build").body), "//param").
+        attributes.get_attribute("value").value
+     )
+    end
+
     private
     
     def path

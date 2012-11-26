@@ -60,7 +60,12 @@ module YouTrackAPI
           raise ArgumentError.new("#{method_name.inspect} not supported")
       end
       @connection.start do |http|
-        resp = http.request(req)
+        case method_name
+          when :put
+            resp = http.request(req, "")
+          else
+            resp = http.request(req)
+        end
         resp.value
         resp
       end
