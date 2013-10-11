@@ -15,6 +15,21 @@ module YouTrackAPI
     # If there is no such user, returns nil
     # if there are several users raises exception
     def find_user(conn, search_params, accept = lambda { |user| true} )
+      find_users(conn, search_params).each {|user|
+        if accept.call(user)
+          if result.nil?
+            result = user
+          else
+            raise ArgumentError
+          end
+        end
+        current_position += 1
+      }
+      result
+    end
+
+    def find_users(conn, search_params)
+     Enumerator.new do |y|
       current_position = 0
       go_on = true
       result = nil
@@ -24,18 +39,11 @@ module YouTrackAPI
         resp = REXML::Document.new(conn.request(:get, "#{conn.rest_path}/admin/user", search_params).body)
         REXML::XPath.each(resp, "//user") { |elem|
           go_on = true
-          user = User.new(conn, elem.attributes[:login]).get
-          if accept.call(user)
-            if result.nil?
-              result = user
-            else
-              raise ArgumentError
-            end
-          end
+          y.yield YouTrackAPI::User.new(conn, elem.attributes[:login.to_s]).get
           current_position += 1
         }
       end
-      result
+     end
     end
 
     def parse_command(vcs_comment)

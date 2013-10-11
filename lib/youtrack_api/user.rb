@@ -28,8 +28,6 @@ module YouTrackAPI
       self
     end
 
-    private
-
     def path
       "#{@conn.rest_path}/admin/user/#{self.login}"
     end
